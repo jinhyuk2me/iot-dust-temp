@@ -8,12 +8,12 @@
 
 /*--------------------------------WiFi 설정--------------------------------*/
 
-const char* ssid = "addinedu_class_1(2.4G)";
+const char* ssid = "addinedu_class_2 (2.4G)";
 const char* password = "addinedu1";
 
 /*--------------------------------PC 서버 주소 및 포트--------------------------------*/
 
-IPAddress serverIP(192, 168, 2, 23);  // ← PC IP로 바꾸세요
+IPAddress serverIP(192, 168, 0, 166);  // ← PC IP로 바꾸세요
 const int serverPort = 8001;  
 WiFiClient client;
 String incoming_msg = "";
@@ -109,9 +109,9 @@ bool battery_empty = false;  // 배터리 0% 상태 플래그
 
 /*--------------------------------PID 제어 변수--------------------------------*/
 
-double Kp = 0.1075;
-double Kd = 0.03;
-double Ki = 0.01;       
+double Kp = 0.1025;
+double Kd = 0.018;
+double Ki = 0.0001;       
 double integral = 0.0;  // 누적 적분값
 double PID_control;
 int last_error = 0;
@@ -121,37 +121,48 @@ int error;
 int l_sensor_val;
 int r_sensor_val;
 int avg_PWM = 150;
-int max_pwm = 75;
+int max_pwm = 100;
 
 /*--------------------------------rfid 객체 생성--------------------------------*/
 
 MFRC522 rfid(SS_PIN, RST_PIN);
 
+TaskHandle_t LineTraceTaskHandle;
+
+
 /*--------------------------------함수 선언--------------------------------*/
 
 void receive_json(const String& msg);
-void send_obstacle(float distance_cm, bool detected, const char* position);
-void send_arrived(const char* position, const char* gate_id);
-bool isSameUID(byte* uid1, byte* uid2);
-bool checkAndPrintUID(byte* uid);
+void send_json(const char* cmd, JsonObject payload);
+void send_obstacle(float, bool, const char*);
+void send_arrived(const char*, const char*);
+bool checkAndPrintUID(byte*);
+bool obstacle_detected();
+void line_trace();
+void stop_motors();
 
-/*--------------------------------코어 디바이딩--------------------------------*/
 
-TaskHandle_t RFIDTaskHandle;
+/*--------------------------------코어 분리--------------------------------*/
 
-void RFIDTask(void* parameter) {
+
+void LineTraceTask(void* parameter) {
   for (;;) {
-    if (run_command) {
-      if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) {
-        checkAndPrintUID(rfid.uid.uidByte);
-        rfid.PICC_HaltA();
-        rfid.PCD_StopCrypto1();
-      }
+    obstacle_block = obstacle_detected();
+    if (run_command && !obstacle_block && !battery_empty) {
+      line_trace();
+      send_obstacle(last_distance_cm, false, current_position.c_str());
+    } else if (obstacle_block) {
+      stop_motors();
+      send_obstacle(last_distance_cm, true, current_position.c_str());
     }
-    // 너무 빠르게 루프 돌지 않도록 아주 짧은 대기
-    vTaskDelay(pdMS_TO_TICKS(10));  // 10ms 대기
+    vTaskDelay(pdMS_TO_TICKS(30));
   }
 }
+
+
+
+
+
 
 
 
@@ -193,17 +204,6 @@ void setup()
   rfid.PCD_Init();
   Serial.println("✅RC522 RFID 리더기 시작됨!");
 
-    // RFID 전용 Task 실행 (Core 0)
-  xTaskCreatePinnedToCore(
-    RFIDTask,
-    "RFIDTask",
-    4096,
-    NULL,
-    1,
-    &RFIDTaskHandle,
-    0
-  );
-
   // 시간 동기화
   configTime(9 * 3600, 0, "pool.ntp.org", "time.nist.gov");
   Serial.println("⏳ 시간 동기화 대기 중...");
@@ -217,6 +217,7 @@ void setup()
   // 미션 요청 자동 전송
   delay(2000);  // 안정화 대기
   send_assign_mission();
+  xTaskCreatePinnedToCore(LineTraceTask, "LineTraceTask", 4096, NULL, 1, &LineTraceTaskHandle, 0);
 
 }
 
@@ -250,23 +251,10 @@ void loop()
     }
   }
 
-    // ✅ 주행 제어
-  obstacle_block = obstacle_detected();
-  if (run_command && !obstacle_block && !battery_empty)
-  {
-    //Serial.println("run");
-    line_trace();
-    send_obstacle(last_distance_cm, false, current_position.c_str());
-  }
-  else if (obstacle_block) 
-  {
-    Serial.println("stop");
-    //Serial.print("Distance: ");
-    //Serial.print(distance_cm);
-    //Serial.println(" cm");
-    stop_motors();
-    send_obstacle(last_distance_cm, true, current_position.c_str());
-  }
+
+
+
+
   //적재 시작 지연 처리
   if (wait_start_loading && (current_time - wait_start_loading_time >= 2000)) {
     Serial.println("🕒 적재 시작 메시지 전송 (2초 지연 후)");
@@ -282,6 +270,25 @@ void loop()
     send_finish_loading();
     loading_in_progress = false;
   }
+
+  // RFID 체크
+  if (!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial()) 
+  {
+    return;
+  }
+
+  Serial.print("UID: ");
+  for (byte i = 0; i < rfid.uid.size; i++) {
+    if (rfid.uid.uidByte[i] < 0x10) Serial.print("0");
+    Serial.print(rfid.uid.uidByte[i], HEX);
+    if (i < rfid.uid.size - 1) Serial.print("-");
+  }
+  Serial.println();
+
+  // UID 확인 및 서버 전송
+  checkAndPrintUID(rfid.uid.uidByte);
+
+
 
   // 🪫 10초마다 배터리 감소
   if (current_time - last_battery_drop >= BATTERY_DROP_INTERVAL) {
@@ -308,6 +315,9 @@ void loop()
     last_battery_report = current_time;
     send_battery_status();
   }
+
+  rfid.PICC_HaltA();
+  rfid.PCD_StopCrypto1();
 
 }
 
@@ -469,6 +479,7 @@ void send_obstacle(float distance_cm, bool detected, const char* position)
   
   send_json("OBSTACLE", payload);
 }
+
 //로딩 시작 메세지
 void send_start_loading() 
 {

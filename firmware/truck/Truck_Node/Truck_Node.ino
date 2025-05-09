@@ -8,12 +8,12 @@
 
 /*--------------------------------WiFi 설정--------------------------------*/
 
-const char* ssid = "addinedu_class_1(2.4G)";
+const char* ssid = "addinedu_class_2 (2.4G)";
 const char* password = "addinedu1";
 
 /*--------------------------------PC 서버 주소 및 포트--------------------------------*/
 
-IPAddress serverIP(192, 168, 2, 23);  // ← PC IP로 바꾸세요
+IPAddress serverIP(192, 168, 0, 166);  // ← PC IP로 바꾸세요
 const int serverPort = 8001;  
 WiFiClient client;
 String incoming_msg = "";
@@ -34,7 +34,8 @@ UIDEntry registeredCards[] = {
   { {0xA3, 0x8F, 0x09, 0x05}, "load_B" },
   { {0x9C, 0x84, 0x0B, 0x05}, "CHECKPOINT_C" },
   { {0x83, 0x58, 0xAE, 0x1A}, "BELT" },
-  { {0xD3, 0xAF, 0xC3, 0x18}, "CHECKPOINT_D" },
+  { {0xD3, 0xAF, 0xC3, 0x1B}, "CHECKPOINT_D" },
+  { {0x53, 0x38, 0xBB, 0x1A}, "STANDBY" },
   
 };
 const int numRegistered = sizeof(registeredCards) / sizeof(registeredCards[0]);
@@ -66,6 +67,13 @@ unsigned long wait_start_loading_time = 0;
 
 bool loading_in_progress = false;
 unsigned long loading_start_time = 0;
+
+/*-------------------------unloading 변수들--------------------------------*/
+bool wait_start_unloading = false;
+unsigned long wait_start_unloading_time = 0;
+
+bool unloading_in_progress = false;
+unsigned long unloading_start_time = 0;
 
 /*--------------------------------가상 배터리 잔량 체크--------------------------------*/
 
@@ -109,9 +117,9 @@ bool battery_empty = false;  // 배터리 0% 상태 플래그
 
 /*--------------------------------PID 제어 변수--------------------------------*/
 
-double Kp = 0.1075;
-double Kd = 0.03;
-double Ki = 0.01;       
+double Kp = 0.1025;
+double Kd = 0.18;
+double Ki = 0.0001;       
 double integral = 0.0;  // 누적 적분값
 double PID_control;
 int last_error = 0;
@@ -121,7 +129,8 @@ int error;
 int l_sensor_val;
 int r_sensor_val;
 int avg_PWM = 150;
-int max_pwm = 75;
+int rmax_pwm = 90;
+int lmax_pwm = 90;
 
 /*--------------------------------rfid 객체 생성--------------------------------*/
 
@@ -136,6 +145,10 @@ bool isSameUID(byte* uid1, byte* uid2);
 bool checkAndPrintUID(byte* uid);
 
 /*--------------------------------------------------------------------------------*/
+
+unsigned long last_uid_detected = 0;
+const unsigned long UID_COOLDOWN = 3000;  // 2초 쿨타임
+
 
 void setup() 
 {
@@ -252,11 +265,37 @@ void loop()
     loading_in_progress = false;
   }
 
+  // 언로딩 시작 지연 처리
+  if (wait_start_unloading && (current_time - wait_start_unloading_time >= 2000)) {
+    Serial.println("🕒 언로딩 시작 메시지 전송 (2초 지연 후)");
+    send_start_unloading();
+    unloading_in_progress = true;
+    unloading_start_time = current_time;
+    wait_start_unloading = false;
+  }
+
+  // 언로딩 완료 로직 (5초 뒤)
+  if (unloading_in_progress && (current_time - unloading_start_time >= 5000)) {
+    Serial.println("✅ 언로딩 완료 메시지 전송 (5초 경과)");
+    send_finish_unloading();
+    unloading_in_progress = false;
+  }
+    
+
   // RFID 체크
   if (!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial()) 
   {
     return;
   }
+
+  // UID 쿨타임 체크
+  unsigned long now = millis();
+  if (now - last_uid_detected < UID_COOLDOWN) {
+    rfid.PICC_HaltA();
+    rfid.PCD_StopCrypto1();
+    return;  // 일정 시간 안에는 무시
+  }
+  last_uid_detected = now;
 
   Serial.print("UID: ");
   for (byte i = 0; i < rfid.uid.size; i++) {
@@ -268,28 +307,6 @@ void loop()
 
   // UID 확인 및 서버 전송
   checkAndPrintUID(rfid.uid.uidByte);
-
-  // // ✅ RFID 체크 (0.3초마다 제한)
-  // static unsigned long last_rfid_check = 0;
-  // const unsigned long RFID_CHECK_INTERVAL = 300;
-  // if (current_time - last_rfid_check >= RFID_CHECK_INTERVAL) {
-  //   last_rfid_check = current_time;
-
-  //   if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial()) {
-  //     Serial.print("UID: ");
-  //     for (byte i = 0; i < rfid.uid.size; i++) {
-  //       if (rfid.uid.uidByte[i] < 0x10) Serial.print("0");
-  //       Serial.print(rfid.uid.uidByte[i], HEX);
-  //       if (i < rfid.uid.size - 1) Serial.print("-");
-  //     }
-  //     Serial.println();
-
-  //     checkAndPrintUID(rfid.uid.uidByte);
-
-  //     rfid.PICC_HaltA();
-  //     rfid.PCD_StopCrypto1();
-  //   }
-  // }
 
   // 🪫 10초마다 배터리 감소
   if (current_time - last_battery_drop >= BATTERY_DROP_INTERVAL) {
@@ -379,6 +396,7 @@ void receive_json(const String& msg)
   Serial.println(gate_id);
 
   send_gateopen_message(gate_id);  // 응답 전송
+  run_command = true;
   }
   else if (strcmp(cmd, "MISSION_ASSIGNED") == 0) 
   {
@@ -480,6 +498,7 @@ void send_obstacle(float distance_cm, bool detected, const char* position)
   
   send_json("OBSTACLE", payload);
 }
+
 //로딩 시작 메세지
 void send_start_loading() 
 {
@@ -502,6 +521,27 @@ void send_finish_loading()
 
   send_json("FINISH_LOADING", payload);
 }
+//언로딩 시작 메세지
+void send_start_unloading() {
+  StaticJsonDocument<128> doc;
+  JsonObject payload = doc.createNestedObject("payload");
+
+  payload["position"] = current_position;
+  payload["timestamp"] = getISOTime();
+
+  send_json("START_UNLOADING", payload);
+}
+
+void send_finish_unloading() {
+  StaticJsonDocument<128> doc;
+  JsonObject payload = doc.createNestedObject("payload");
+
+  payload["position"] = current_position;
+  payload["timestamp"] = getISOTime();
+
+  send_json("FINISH_UNLOADING", payload);
+}
+
 
 void send_battery_status() {
   StaticJsonDocument<128> doc;
@@ -534,8 +574,8 @@ void line_trace() {
 
   last_error = error;
 
-  R_PWM = speed_limit(avg_PWM - PID_control, 0, max_pwm);
-  L_PWM = speed_limit(avg_PWM + PID_control, 0, max_pwm);
+  R_PWM = speed_limit(avg_PWM - PID_control, 0, rmax_pwm);
+  L_PWM = speed_limit(avg_PWM + PID_control, 0, lmax_pwm);
 
   left_motor_f(L_PWM);
   right_motor_f(R_PWM);
@@ -621,16 +661,16 @@ bool checkAndPrintUID(byte* uid)
       } 
       else if (strcmp(desc, "CHECKPOINT_B") == 0) 
       {
-        send_arrived("CHECKPOINT_B", "GATE_B");
+        send_arrived("CHECKPOINT_B", "GATE_A");
       } 
       else if (strcmp(desc, "CHECKPOINT_C") == 0) 
       {
-        send_arrived("CHECKPOINT_C", "GATE_C");
+        send_arrived("CHECKPOINT_C", "GATE_B");
         run_command = false;
       } 
       else if (strcmp(desc, "CHECKPOINT_D") == 0) 
       {
-        send_arrived("CHECKPOINT_D", "GATE_D");
+        send_arrived("CHECKPOINT_D", "GATE_B");
       }
       else if (strcmp(desc, "load_A") == 0)                        //load_A
       {
@@ -656,7 +696,17 @@ bool checkAndPrintUID(byte* uid)
       else if (strcmp(desc, "BELT") == 0) 
       {
         send_arrived("BELT", "BELT");
+        wait_start_unloading = true;
+        wait_start_unloading_time = millis();
+        
       }
+      else if (strcmp(desc, "STANDBY") == 0) 
+      {
+        send_arrived("STANDBY", "STANDBY");
+        run_command = false;
+        send_assign_mission(); 
+      } 
+
 
       // 🎯 목적지에 도달한 경우 멈춤
       if (mission_target != "" && mission_target == String(desc)) {
