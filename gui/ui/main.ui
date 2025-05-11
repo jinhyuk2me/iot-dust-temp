@@ -14,241 +14,333 @@
    <string>지능형 운송관제 시스템 D.U.S.T.</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <widget class="QTabWidget" name="tabWidget">
-      <property name="currentIndex">
-       <number>0</number>
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>1196</width>
+      <height>606</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    
+    <widget class="QWidget" name="tab_main_monitoring">
+     <attribute name="title">
+      <string>Main Monitoring</string>
+     </attribute>
+     
+     <widget class="QGraphicsView" name="graphicsview_map">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>820</width>
+        <height>550</height>
+       </rect>
       </property>
-      <widget class="QWidget" name="tab_main_monitoring">
-       <attribute name="title">
-        <string>Main Monitoring</string>
-       </attribute>
-       <layout class="QHBoxLayout" name="mainHorizontalLayout">
-        <item>
-         <widget class="QGraphicsView" name="graphicsview_map">
-          <property name="minimumSize">
-           <size>
-            <width>820</width>
-            <height>220</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="rightVBoxLayout">
-          <item>
-           <widget class="QGroupBox" name="groupBox">
-            <property name="title">
-             <string>배터리 상태</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_battery">
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_battery1">
-               <item>
-                <widget class="QLabel" name="label_battery_truck1">
-                 <property name="text">
-                  <string>TRUCK_01</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QProgressBar" name="progressbar_battery_truck1">
-                 <property name="value">
-                  <number>24</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_battery2">
-               <item>
-                <widget class="QLabel" name="label_battery_truck2">
-                 <property name="text">
-                  <string>TRUCK_02</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QProgressBar" name="progressbar_battery_truck2">
-                 <property name="value">
-                  <number>24</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_battery3">
-               <item>
-                <widget class="QLabel" name="label_battery_truck3">
-                 <property name="text">
-                  <string>TRUCK_03</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QProgressBar" name="progressbar_battery_truck3">
-                 <property name="value">
-                  <number>24</number>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_velocity">
-            <property name="text">
-             <string>주행 속도</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSlider" name="horizontalslider_velocity">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_alert">
-            <property name="text">
-             <string>긴급 알림</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QTextEdit" name="textEdit"/>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tab_misssion_management">
-       <attribute name="title">
-        <string>Mission Management</string>
-       </attribute>
-       <widget class="QTableWidget" name="tablewidget">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>10</y>
-          <width>821</width>
-          <height>541</height>
-         </rect>
-        </property>
-       </widget>
-       <widget class="QGroupBox" name="groupbox_add_mission">
-        <property name="geometry">
-         <rect>
-          <x>840</x>
-          <y>10</y>
-          <width>331</width>
-          <height>231</height>
-         </rect>
-        </property>
-        <property name="title">
-         <string>미션 추가</string>
-        </property>
-        <widget class="QLineEdit" name="lineedit_type">
-         <property name="geometry">
-          <rect>
-           <x>20</x>
-           <y>40</y>
-           <width>291</width>
-           <height>27</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="placeholderText">
-          <string>화물종류</string>
-         </property>
-        </widget>
-        <widget class="QSpinBox" name="spinBox">
-         <property name="geometry">
-          <rect>
-           <x>20</x>
-           <y>80</y>
-           <width>291</width>
-           <height>28</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QComboBox" name="combobox_source">
-         <property name="geometry">
-          <rect>
-           <x>20</x>
-           <y>120</y>
-           <width>291</width>
-           <height>27</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pushbutton_add">
-         <property name="geometry">
-          <rect>
-           <x>20</x>
-           <y>160</y>
-           <width>291</width>
-           <height>27</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>추가</string>
-         </property>
-        </widget>
-       </widget>
-       <widget class="QPushButton" name="pushbutton_delete">
-        <property name="geometry">
-         <rect>
-          <x>840</x>
-          <y>250</y>
-          <width>331</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>선택 미션 삭제</string>
-        </property>
-       </widget>
-       <widget class="QPushButton" name="pushbutton_refresh">
-        <property name="geometry">
-         <rect>
-          <x>840</x>
-          <y>290</y>
-          <width>331</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>새로고침</string>
-        </property>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="tab_facility_control">
-       <attribute name="title">
-        <string>Facility Control</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tab_event_log">
-       <attribute name="title">
-        <string>Event Log</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tab_settings">
-       <attribute name="title">
-        <string>Settings</string>
-       </attribute>
-      </widget>
+      <property name="minimumSize">
+       <size>
+        <width>820</width>
+        <height>220</height>
+       </size>
+      </property>
      </widget>
-    </item>
-   </layout>
+     
+     <widget class="QLabel" name="label_battery_title">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>10</y>
+        <width>150</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>배터리 상태</string>
+      </property>
+     </widget>
+     
+     <widget class="QLabel" name="label_battery_truck1">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>50</y>
+        <width>100</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TRUCK_01</string>
+      </property>
+     </widget>
+     
+     <widget class="QProgressBar" name="progressbar_battery_truck1">
+      <property name="geometry">
+       <rect>
+        <x>940</x>
+        <y>50</y>
+        <width>245</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+     
+     <widget class="QLabel" name="label_battery_truck2">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>85</y>
+        <width>100</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TRUCK_02</string>
+      </property>
+     </widget>
+     
+     <widget class="QProgressBar" name="progressbar_battery_truck2">
+      <property name="geometry">
+       <rect>
+        <x>940</x>
+        <y>85</y>
+        <width>245</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+     
+     <widget class="QLabel" name="label_battery_truck3">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>120</y>
+        <width>100</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TRUCK_03</string>
+      </property>
+     </widget>
+     
+     <widget class="QProgressBar" name="progressbar_battery_truck3">
+      <property name="geometry">
+       <rect>
+        <x>940</x>
+        <y>120</y>
+        <width>245</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
+     
+     <widget class="QLabel" name="label_velocity">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>170</y>
+        <width>150</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>주행 속도</string>
+      </property>
+     </widget>
+     
+     <widget class="QSlider" name="horizontalslider_velocity">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>200</y>
+        <width>340</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     
+     <widget class="QLabel" name="label_alert">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>240</y>
+        <width>150</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>긴급 알림</string>
+      </property>
+     </widget>
+     
+     <widget class="QTextEdit" name="textEdit">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>270</y>
+        <width>340</width>
+        <height>290</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    
+    <widget class="QWidget" name="tab_misssion_management">
+     <attribute name="title">
+      <string>Mission Management</string>
+     </attribute>
+     
+     <widget class="QTableWidget" name="tablewidget">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>821</width>
+        <height>541</height>
+       </rect>
+      </property>
+     </widget>
+     
+     <widget class="QLabel" name="label_add_mission">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>10</y>
+        <width>331</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>미션 추가</string>
+      </property>
+     </widget>
+     
+     <widget class="QLineEdit" name="lineedit_type">
+      <property name="geometry">
+       <rect>
+        <x>860</x>
+        <y>50</y>
+        <width>291</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="placeholderText">
+       <string>화물종류</string>
+      </property>
+     </widget>
+     
+     <widget class="QSpinBox" name="spinBox">
+      <property name="geometry">
+       <rect>
+        <x>860</x>
+        <y>90</y>
+        <width>291</width>
+        <height>28</height>
+       </rect>
+      </property>
+     </widget>
+     
+     <widget class="QComboBox" name="combobox_source">
+      <property name="geometry">
+       <rect>
+        <x>860</x>
+        <y>130</y>
+        <width>291</width>
+        <height>27</height>
+       </rect>
+      </property>
+     </widget>
+     
+     <widget class="QPushButton" name="pushbutton_add">
+      <property name="geometry">
+       <rect>
+        <x>860</x>
+        <y>170</y>
+        <width>291</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>추가</string>
+      </property>
+     </widget>
+     
+     <widget class="QPushButton" name="pushbutton_delete">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>250</y>
+        <width>331</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>선택 미션 삭제</string>
+      </property>
+     </widget>
+     
+     <widget class="QPushButton" name="pushbutton_refresh">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>290</y>
+        <width>331</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>새로고침</string>
+      </property>
+     </widget>
+    </widget>
+    
+    <widget class="QWidget" name="tab_facility_control">
+     <attribute name="title">
+      <string>Facility Control</string>
+     </attribute>
+    </widget>
+    
+    <widget class="QWidget" name="tab_event_log">
+     <attribute name="title">
+      <string>Event Log</string>
+     </attribute>
+    </widget>
+    
+    <widget class="QWidget" name="tab_settings">
+     <attribute name="title">
+      <string>Settings</string>
+     </attribute>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

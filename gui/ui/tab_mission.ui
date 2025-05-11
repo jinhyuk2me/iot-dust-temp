@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Mission Management</string>
+  </property>
+  <widget class="QTableWidget" name="tableWidget_mission">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>800</width>
+     <height>580</height>
+    </rect>
+   </property>
+   <property name="editTriggers">
+    <set>QAbstractItemView::NoEditTriggers</set>
+   </property>
+   <property name="alternatingRowColors">
+    <bool>true</bool>
+   </property>
+   <property name="selectionBehavior">
+    <enum>QAbstractItemView::SelectRows</enum>
+   </property>
+   <property name="sortingEnabled">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>820</x>
+     <y>10</y>
+     <width>370</width>
+     <height>280</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>미션 조회</string>
+   </property>
+   <widget class="QLabel" name="label_status">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>350</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>상태 필터:</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_waiting_for_search">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>60</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>WAITING</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_assigned_for_search">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>60</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ASSIGNED</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_completed_for_search">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>60</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>COMPLETED</string>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_canceled_for_search">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>90</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>CANCELED</string>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_error_for_search">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>90</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ERROR</string>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_truck">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>120</y>
+      <width>350</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>트럭 필터:</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_truck_id_for_search">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>150</y>
+      <width>350</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>모든 트럭</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>트럭 1</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>트럭 2</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>트럭 3</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label_source">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>190</y>
+      <width>350</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>출발지 필터:</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_source_for_search">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>220</y>
+      <width>350</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>모든 출발지</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>LOAD_A</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>LOAD_B</string>
+     </property>
+    </item>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_2">
+   <property name="geometry">
+    <rect>
+     <x>820</x>
+     <y>300</y>
+     <width>370</width>
+     <height>290</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>미션 추가</string>
+   </property>
+   <widget class="QLabel" name="label_type">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>화물 종류:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_type_for_add">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>30</y>
+      <width>240</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="placeholderText">
+     <string>화물 종류 입력</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_amount">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>65</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>화물 양:</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="spinBox_amount_for_add">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>65</y>
+      <width>240</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="maximum">
+     <number>1000</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_source_add">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>출발지:</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_source_for_add">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>100</y>
+      <width>240</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>LOAD_A</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>LOAD_B</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label_destination_add">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>135</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>도착지:</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_destination_for_add">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>135</y>
+      <width>240</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>UNLOAD_A</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>UNLOAD_B</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label_truck_add">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>170</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>트럭 ID:</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_truck_id_for_add">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>170</y>
+      <width>240</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>자동 선택</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>트럭 1</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>트럭 2</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>트럭 3</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QPushButton" name="pushButton_add_mission">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>250</y>
+      <width>170</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>미션 추가</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_refresh_table">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>250</y>
+      <width>170</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>미션 목록 새로고침</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_cancel_mission">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>210</y>
+      <width>350</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>선택한 미션 취소</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

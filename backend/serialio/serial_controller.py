@@ -1,103 +1,107 @@
-# backend/serialio/serial_controller.py
-
-import serial
+import threading
 import time
-from backend.serialio.protocol import SerialProtocol
-from backend.serialio.fake_serial import FakeSerial
+from typing import Optional
 
 class SerialController:
-    def __init__(self, port="/dev/ttyUSB0", baudrate=9600, use_fake=False):
-        if use_fake:
-            self.ser = FakeSerial(name=port)  # ✅ 가상 시리얼 사용
-        else:
-            self.ser = serial.Serial(port, baudrate, timeout=1)
-
-    # 구조화된 명령어 전송
+    def __init__(self, serial_interface):
+        self.interface = serial_interface
+        self.running = True
+        self.polling_thread: Optional[threading.Thread] = None
+    
+    # 시리얼 폴링 시작  
+    def start_polling(self):
+        if self.polling_thread and self.polling_thread.is_alive():
+            print(f"[{self.__class__.__name__}] 이미 폴링 중")
+            return False  # 이미 실행 중
+            
+        self.polling_thread = threading.Thread(
+            target=self.poll_serial,
+            daemon=True
+        )
+        self.running = True
+        self.polling_thread.start()
+        print(f"[{self.__class__.__name__}] 시리얼 폴링 시작")
+        return True
+        
+    # 시리얼 폴링 중지
+    def stop_polling(self):
+        if not self.polling_thread or not self.polling_thread.is_alive():
+            return False
+            
+        self.running = False
+        self.polling_thread.join(timeout=1)
+        print(f"[{self.__class__.__name__}] 시리얼 폴링 중지")
+        return True
+        
+    # 시리얼 폴링 루프
+    def poll_serial(self):
+        device_name = self.__class__.__name__
+        print(f"[{device_name}] 시리얼 폴링 시작")
+        try:
+            while self.running:
+                try:
+                    line = self.interface.read_response(timeout=1)  # 짧은 타임아웃
+                    if line and isinstance(line, str):
+                        self.handle_message(line)
+                except Exception as e:
+                    print(f"[{device_name} 경고] 폴링 중 오류: {e}")
+                    # 일시적 오류시 중단 방지
+                time.sleep(0.01)  # CPU 사용량 감소
+        except Exception as e:
+            print(f"[{device_name} 오류] 시리얼 폴링 중단: {e}")
+        finally:
+            print(f"[{device_name}] 시리얼 폴링 종료")
+    
+    # 메시지 처리
+    def handle_message(self, message: str):
+        raise NotImplementedError("자식 클래스에서 구현해야 합니다")
+    
+    # 응답 읽기
+    def read_response(self, timeout=5):
+        return self.interface.read_response(timeout=timeout)
+    
+    # 명령 전송
     def send_command(self, target: str, action: str):
         """
-        구조화된 명령어 전송: ex) GATE_A + OPEN → 'GATE_A:OPEN'
-        """
-        command = SerialProtocol.build_command(target, action)
-        print(f"[Serial Send] {command.strip()}")
-        self.ser.write(command.encode())
-
-    # 단순 텍스트 명령 전송
-    def write(self, msg: str):
-        """
-        단순 텍스트 명령 전송 (예: BELTACT, BELTOFF 등)
-        """
-        try:
-            self.ser.write((msg + '\n').encode())
-        except Exception as e:
-            print(f"[SerialController 오류] write 실패: {e}")
-
-    # 응답 수신
-    def read_response(self, timeout=5):
-        """
-        응답 수신 (ACK 또는 장치 상태 등) → 문자열로 반환
-        ✅ 벨트의 BELTON/BELTOFF/ConA_FULL 같은 응답도 로깅
+        표준화된 형식으로 명령 전송
         
         Args:
-            timeout (int): 응답 대기 시간(초). 기본값은 5초.
-        
-        Returns:
-            str: 수신된 응답 문자열. 시간 초과시 None.
-        """
-        start_time = time.time()
-        wait_count = 0
-        
-        print(f"[SerialController] 응답 대기 시작 (최대 {timeout}초)")
-        
-        while time.time() - start_time < timeout:
-            # 주기적으로 대기 중임을 표시
-            if wait_count % 20 == 0:  # 2초마다 로그
-                print(f"[SerialController] 응답 대기 중... (경과: {time.time() - start_time:.1f}초)")
-            wait_count += 1
+            target: 대상 (예: "GATE_A", "BELT")
+            action: 동작 (예: "OPEN", "CLOSE", "RUN", "STOP")
             
-            if self.ser.in_waiting:
-                try:
-                    # 반복문으로 여러 줄이 왔을 때 처리 가능하도록
-                    line = self.ser.readline().decode().strip()
-                    
-                    if not line:
-                        time.sleep(0.1)
-                        continue
-                    
-                    # ✅ FakeSerial 응답일 경우 
-                    # "STATUS:" 프리픽스를 제거
-                    if line.startswith("STATUS:"):
-                        line = line.replace("STATUS:", "", 1)
-
-                    # ✅ 게이트 응답 처리 개선
-                    if "GATE_" in line and "OPENED" in line:
-                        print(f"[🚪 게이트 열림 응답] {line}")
-                        return line
-                    elif "GATE_" in line and "CLOSED" in line:
-                        print(f"[🚪 게이트 닫힘 응답] {line}")
-                        return line
-                    
-                    # ✅ 벨트 상태 응답 로깅
-                    elif any(status in line for status in ["BELTON", "BELTOFF", "ConA_FULL"]):
-                        print(f"[🔄 벨트 상태] {line}")
-                        return line
-                    elif line.startswith("ACK:"):
-                        print(f"[✅ ACK 응답] {line}")
-                        return line
-                    else:
-                        print(f"[ℹ️ 기타 응답] {line}")
-                        return line  # 알 수 없는 응답도 반환
-                except UnicodeDecodeError:
-                    print("[⚠️ 디코딩 오류] 응답을 해석할 수 없습니다.")
-                    continue
-
-            # 짧은 대기 시간으로 CPU 사용량 감소
-            time.sleep(0.1)
-        
-        print(f"[⏰ 응답 시간 초과 ({timeout}초)]")
-        return None
-
-    def close(self):
+        Returns:
+            bool: 성공 여부
+        """
         try:
-            self.ser.close()
-        except Exception:
-            pass 
+            self.interface.send_command(target, action)
+            return True
+        except Exception as e:
+            print(f"[{self.__class__.__name__}] 명령 전송 오류: {e}")
+            return False
+    
+    # 직접 쓰기
+    def write(self, message: str):
+        """
+        직접 메시지 쓰기
+        
+        Args:
+            message: 전송할 메시지
+            
+        Returns:
+            bool: 성공 여부
+        """
+        try:
+            self.interface.write(message)
+            return True
+        except Exception as e:
+            print(f"[{self.__class__.__name__}] 메시지 쓰기 오류: {e}")
+            return False
+        
+    # 종료
+    def close(self):
+        self.running = False
+        if self.polling_thread and self.polling_thread.is_alive():
+            self.polling_thread.join(timeout=1)
+        if hasattr(self.interface, 'close'):
+            self.interface.close()
+        print(f"[{self.__class__.__name__}] 종료됨") 

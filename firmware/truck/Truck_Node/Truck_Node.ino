@@ -34,8 +34,8 @@ UIDEntry registeredCards[] = {
   { {0xA3, 0x8F, 0x09, 0x05}, "load_B" },
   { {0x9C, 0x84, 0x0B, 0x05}, "CHECKPOINT_C" },
   { {0x83, 0x58, 0xAE, 0x1A}, "BELT" },
-  { {0xD3, 0xAF, 0xC3, 0x1B}, "CHECKPOINT_D" },
-  { {0x53, 0x38, 0xBB, 0x1A}, "STANDBY" },
+  { {0x63, 0x9D, 0x9F, 0x35}, "CHECKPOINT_D" },
+  { {0xF3, 0x16, 0x63, 0x1B}, "STANDBY" },
   
 };
 const int numRegistered = sizeof(registeredCards) / sizeof(registeredCards[0]);
@@ -74,6 +74,16 @@ unsigned long wait_start_unloading_time = 0;
 
 bool unloading_in_progress = false;
 unsigned long unloading_start_time = 0;
+
+unsigned long unloading_stage_time = 0;
+int unloading_stage = 0;
+
+// 서보모터 제어 관련 전역 변수
+Servo unloading_servo;
+const int SERVO_PIN = 17;
+const int SERVO_INIT_ANGLE = 170;
+const int SERVO_DROP_ANGLE = 90;
+bool unloading_servo_moved = false;  // 서보 동작 완료 체크
 
 /*--------------------------------가상 배터리 잔량 체크--------------------------------*/
 
@@ -117,8 +127,8 @@ bool battery_empty = false;  // 배터리 0% 상태 플래그
 
 /*--------------------------------PID 제어 변수--------------------------------*/
 
-double Kp = 0.1025;
-double Kd = 0.18;
+double Kp = 0.1020;
+double Kd = 0.2;
 double Ki = 0.0001;       
 double integral = 0.0;  // 누적 적분값
 double PID_control;
@@ -129,8 +139,7 @@ int error;
 int l_sensor_val;
 int r_sensor_val;
 int avg_PWM = 150;
-int rmax_pwm = 90;
-int lmax_pwm = 90;
+int max_pwm = 75;
 
 /*--------------------------------rfid 객체 생성--------------------------------*/
 
@@ -145,10 +154,6 @@ bool isSameUID(byte* uid1, byte* uid2);
 bool checkAndPrintUID(byte* uid);
 
 /*--------------------------------------------------------------------------------*/
-
-unsigned long last_uid_detected = 0;
-const unsigned long UID_COOLDOWN = 3000;  // 2초 쿨타임
-
 
 void setup() 
 {
@@ -168,6 +173,10 @@ void setup()
   // 초음파센서 핀 설정
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
+
+  //서보모터 초기 설정
+  unloading_servo.attach(SERVO_PIN);
+  unloading_servo.write(SERVO_INIT_ANGLE);  // 초기 위치
 
   // WiFi 연결
   WiFi.begin(ssid, password);
@@ -210,11 +219,9 @@ void loop()
   if (client && client.available()) {
     incoming_msg = client.readStringUntil('\n');
     incoming_msg.trim();
-
-    Serial.println("========== 📩 [서버 메시지 수신] ==========");
-    Serial.println(incoming_msg);
-    Serial.println("===========================================");
-
+    // Serial.println("========== 📩 [서버 메시지 수신] ==========");
+    // Serial.println(incoming_msg);
+    // Serial.println("===========================================");
     receive_json(incoming_msg);
   }
 
@@ -225,7 +232,7 @@ void loop()
   if (current_time - last_mission_check >= MISSION_CHECK_INTERVAL) 
   {
     last_mission_check = current_time;
-    if (current_position == "UNKNOWN" || current_position == "STANDBY") 
+    if (current_position == "UNKNOWN") // 원래는 같이 있었음|| current_position == "STANDBY"
     {
       Serial.println("[🔄 미션 체크] 새로운 미션 확인 중...");
       send_assign_mission();
@@ -238,7 +245,7 @@ void loop()
   {
     //Serial.println("run");
     line_trace();
-    send_obstacle(last_distance_cm, false, current_position.c_str());
+    //send_obstacle(last_distance_cm, false, current_position.c_str());
   }
   else if (obstacle_block) 
   {
@@ -249,8 +256,10 @@ void loop()
     stop_motors();
     send_obstacle(last_distance_cm, true, current_position.c_str());
   }
+
   //적재 시작 지연 처리
-  if (wait_start_loading && (current_time - wait_start_loading_time >= 2000)) {
+  if (wait_start_loading && (current_time - wait_start_loading_time >= 2000)) 
+  {
     Serial.println("🕒 적재 시작 메시지 전송 (2초 지연 후)");
     send_start_loading();
     loading_in_progress = true;
@@ -266,44 +275,28 @@ void loop()
   }
 
   // 언로딩 시작 지연 처리
-  if (wait_start_unloading && (current_time - wait_start_unloading_time >= 2000)) {
-    Serial.println("🕒 언로딩 시작 메시지 전송 (2초 지연 후)");
-    send_start_unloading();
-    unloading_in_progress = true;
-    unloading_start_time = current_time;
+  if (wait_start_unloading && (current_time - wait_start_unloading_time >= 2000)) 
+  {
+    start_unloading();
     wait_start_unloading = false;
   }
 
-  // 언로딩 완료 로직 (5초 뒤)
-  if (unloading_in_progress && (current_time - unloading_start_time >= 5000)) {
-    Serial.println("✅ 언로딩 완료 메시지 전송 (5초 경과)");
-    send_finish_unloading();
-    unloading_in_progress = false;
-  }
+  // 언로딩 FSM 처리
+  handle_unloading(current_time);
     
-
   // RFID 체크
   if (!rfid.PICC_IsNewCardPresent() || !rfid.PICC_ReadCardSerial()) 
   {
     return;
   }
 
-  // UID 쿨타임 체크
-  unsigned long now = millis();
-  if (now - last_uid_detected < UID_COOLDOWN) {
-    rfid.PICC_HaltA();
-    rfid.PCD_StopCrypto1();
-    return;  // 일정 시간 안에는 무시
-  }
-  last_uid_detected = now;
-
-  Serial.print("UID: ");
-  for (byte i = 0; i < rfid.uid.size; i++) {
-    if (rfid.uid.uidByte[i] < 0x10) Serial.print("0");
-    Serial.print(rfid.uid.uidByte[i], HEX);
-    if (i < rfid.uid.size - 1) Serial.print("-");
-  }
-  Serial.println();
+  // Serial.print("UID: ");
+  // for (byte i = 0; i < rfid.uid.size; i++) {
+  //   if (rfid.uid.uidByte[i] < 0x10) Serial.print("0");
+  //   Serial.print(rfid.uid.uidByte[i], HEX);
+  //   if (i < rfid.uid.size - 1) Serial.print("-");
+  // }
+  // Serial.println();
 
   // UID 확인 및 서버 전송
   checkAndPrintUID(rfid.uid.uidByte);
@@ -336,7 +329,6 @@ void loop()
 
   rfid.PICC_HaltA();
   rfid.PCD_StopCrypto1();
-
 }
 
 /*------------------------------- 수신 처리--------------------------------*/
@@ -574,8 +566,8 @@ void line_trace() {
 
   last_error = error;
 
-  R_PWM = speed_limit(avg_PWM - PID_control, 0, rmax_pwm);
-  L_PWM = speed_limit(avg_PWM + PID_control, 0, lmax_pwm);
+  R_PWM = speed_limit(avg_PWM - PID_control, 0, max_pwm);
+  L_PWM = speed_limit(avg_PWM + PID_control, 0, max_pwm);
 
   left_motor_f(L_PWM);
   right_motor_f(R_PWM);
@@ -629,6 +621,43 @@ bool obstacle_detected() {
 
   return distance_cm < 12.0;  // 10cm 이내면 true
 }
+/*--------------------------------언로딩 처리 함수--------------------------------*/
+
+void start_unloading() {
+  Serial.println("🕒 언로딩 시작 메시지 전송 (2초 지연 후)");
+  send_start_unloading();
+  unloading_in_progress = true;
+  unloading_stage = 1;
+  unloading_stage_time = millis();
+}
+
+
+void handle_unloading(unsigned long current_time) {
+  if (!unloading_in_progress) return;
+
+  if (unloading_stage == 1 && current_time - unloading_stage_time >= 0) 
+  {
+    Serial.println("✅ 언로딩 서보모터 → 90도 (내리기)");
+    unloading_servo.write(SERVO_DROP_ANGLE);
+    unloading_stage_time = current_time;
+    unloading_stage = 2;
+  }
+  else if (unloading_stage == 2 && current_time - unloading_stage_time >= 2000) 
+  {
+    Serial.println("✅ 언로딩 서보모터 → 170도 (올리기)");
+    unloading_servo.write(SERVO_INIT_ANGLE);
+    unloading_stage_time = current_time;
+    unloading_stage = 3;
+  }
+  else if (unloading_stage == 3 && current_time - unloading_stage_time >= 1000) 
+  {
+    Serial.println("✅ 언로딩 완료 메시지 전송");
+    send_finish_unloading();
+    unloading_in_progress = false;
+    unloading_stage = 0;
+  }
+}
+
 
 /*--------------------------------UID 관련 함수--------------------------------*/
 
@@ -675,10 +704,11 @@ bool checkAndPrintUID(byte* uid)
       else if (strcmp(desc, "load_A") == 0)                        //load_A
       {
         send_arrived("load_A", "LOAD_A");
-
         // 현재 목적지가 load_A인 경우에만 적재 시작 대기
-        if (mission_target == "load_A") 
+        if ((mission_target == "LOAD_A")or(mission_target == "load_A")) 
         {
+          Serial.println(mission_target);
+          Serial.println("Debug1");
           wait_start_loading = true;
           wait_start_loading_time = millis();
         }
@@ -687,7 +717,7 @@ bool checkAndPrintUID(byte* uid)
       {
         send_arrived("load_B", "LOAD_B");
 
-        if (mission_target == "load_B") 
+        if ((mission_target == "load_B") or (mission_target == "LOAD_B")) 
         {
           wait_start_loading = true;
           wait_start_loading_time = millis();
@@ -704,6 +734,7 @@ bool checkAndPrintUID(byte* uid)
       {
         send_arrived("STANDBY", "STANDBY");
         run_command = false;
+
         send_assign_mission(); 
       } 
 
