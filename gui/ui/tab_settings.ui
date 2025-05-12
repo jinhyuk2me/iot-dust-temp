@@ -1,0 +1,657 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QTabWidget" name="tabWidget_settings">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>1180</width>
+     <height>580</height>
+    </rect>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <widget class="QWidget" name="tab_general">
+    <attribute name="title">
+     <string>일반 설정</string>
+    </attribute>
+    <widget class="QGroupBox" name="groupBox_display">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>1150</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>화면 설정</string>
+     </property>
+     <widget class="QLabel" name="label_theme">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>100</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>테마:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBox_theme">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>30</y>
+        <width>200</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>라이트 모드</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>다크 모드</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>시스템 설정 따르기</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="label_language">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>65</y>
+        <width>100</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>언어:</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBox_language">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>65</y>
+        <width>200</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>한국어</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>English</string>
+       </property>
+      </item>
+     </widget>
+     <widget class="QLabel" name="label_font_size">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>100</y>
+        <width>100</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>글꼴 크기:</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="spinBox_font_size">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>100</y>
+        <width>100</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>8</number>
+      </property>
+      <property name="maximum">
+       <number>20</number>
+      </property>
+      <property name="value">
+       <number>10</number>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_notification">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>170</y>
+       <width>1150</width>
+       <height>200</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>알림 설정</string>
+     </property>
+     <widget class="QCheckBox" name="checkBox_enable_notifications">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>300</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>알림 활성화</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_sound_notifications">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>60</y>
+        <width>300</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>소리 알림 활성화</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_mission_complete">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>90</y>
+        <width>300</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>미션 완료 시 알림</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_error_notifications">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>120</y>
+        <width>300</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>오류 발생 시 알림</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_battery_notifications">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>150</y>
+        <width>300</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>배터리 부족 시 알림</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_network">
+    <attribute name="title">
+     <string>네트워크 설정</string>
+    </attribute>
+    <widget class="QGroupBox" name="groupBox_server">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>1150</width>
+       <height>200</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>서버 연결 설정</string>
+     </property>
+     <widget class="QLabel" name="label_server_address">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>100</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>서버 주소:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_server_address">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>30</y>
+        <width>200</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>localhost</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_server_port">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>65</y>
+        <width>100</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>서버 포트:</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="spinBox_server_port">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>65</y>
+        <width>100</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>1024</number>
+      </property>
+      <property name="maximum">
+       <number>65535</number>
+      </property>
+      <property name="value">
+       <number>5001</number>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_test_connection">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>100</y>
+        <width>150</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>연결 테스트</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_restart_server">
+      <property name="geometry">
+       <rect>
+        <x>180</x>
+        <y>100</y>
+        <width>150</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>서버 재시작</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_connection_status">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>140</y>
+        <width>310</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>연결 상태: 연결되지 않음</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_tcp">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>220</y>
+       <width>1150</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>TCP 서버 설정</string>
+     </property>
+     <widget class="QLabel" name="label_tcp_port">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>100</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TCP 포트:</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="spinBox_tcp_port">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>30</y>
+        <width>100</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>1024</number>
+      </property>
+      <property name="maximum">
+       <number>65535</number>
+      </property>
+      <property name="value">
+       <number>8001</number>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_tcp_autostart">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>65</y>
+        <width>300</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>프로그램 시작 시 자동으로 TCP 서버 시작</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_restart_tcp">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>95</y>
+        <width>150</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TCP 서버 재시작</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_database">
+    <attribute name="title">
+     <string>데이터베이스 설정</string>
+    </attribute>
+    <widget class="QGroupBox" name="groupBox_database">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>1150</width>
+       <height>200</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>데이터베이스 연결 설정</string>
+     </property>
+     <widget class="QLabel" name="label_db_host">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>100</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>호스트:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_db_host">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>30</y>
+        <width>200</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>localhost</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_db_port">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>65</y>
+        <width>100</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>포트:</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="spinBox_db_port">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>65</y>
+        <width>100</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>1024</number>
+      </property>
+      <property name="maximum">
+       <number>65535</number>
+      </property>
+      <property name="value">
+       <number>3306</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_db_name">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>100</y>
+        <width>100</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>데이터베이스명:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_db_name">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>100</y>
+        <width>200</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>dust</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_db_user">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>135</y>
+        <width>100</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>사용자명:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_db_user">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>135</y>
+        <width>200</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>root</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_db_password">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>170</y>
+        <width>100</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>비밀번호:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_db_password">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>170</y>
+        <width>200</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>password</string>
+      </property>
+      <property name="echoMode">
+       <enum>QLineEdit::Password</enum>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_test_db">
+      <property name="geometry">
+       <rect>
+        <x>340</x>
+        <y>170</y>
+        <width>150</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>연결 테스트</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_db_management">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>220</y>
+       <width>1150</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>데이터베이스 관리</string>
+     </property>
+     <widget class="QPushButton" name="pushButton_backup_db">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>200</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>데이터베이스 백업</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_restore_db">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>70</y>
+        <width>200</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>데이터베이스 복원</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButton_reset_db">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>110</y>
+        <width>200</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>데이터베이스 초기화</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui> 

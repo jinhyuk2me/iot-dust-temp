@@ -1,10 +1,12 @@
-# frontend/gui/login_window.py
+# gui/login_window.py
 
 from PyQt6.QtWidgets import QMainWindow, QMessageBox, QLineEdit
 from PyQt6 import uic
 import os
-from backend.auth.user_auth import UserAuthManager
+
+from backend.auth.auth_manager import AuthManager
 from gui.admin_main_window import AdminMainWindow
+from gui.operator_main_window import OperatorMainWindow
 
 class LoginWindow(QMainWindow):
     def __init__(self):
@@ -18,7 +20,7 @@ class LoginWindow(QMainWindow):
         self.input_pw.setEchoMode(QLineEdit.EchoMode.Password)
 
         # DB 인증 관리자 설정
-        self.auth_manager = UserAuthManager({
+        self.auth_manager = AuthManager({
             "host": "localhost",
             "user": "root",
             "password": "jinhyuk2dacibul",
@@ -41,7 +43,13 @@ class LoginWindow(QMainWindow):
             QMessageBox.warning(self, "로그인 실패", "❌ 아이디 또는 비밀번호가 잘못되었습니다.")
 
     def open_main(self, role):
-        # 로그인 성공 → 메인 탭 창 열기
-        self.main = AdminMainWindow(role)
+        # 로그인 성공 → 역할에 따라 적절한 메인 윈도우 열기
+        if role == "admin" or role == "god":
+            # 관리자나 god 권한인 경우 관리자 윈도우 열기
+            self.main = AdminMainWindow()
+        else:
+            # 그 외 역할(operator)는 운영자 윈도우 열기
+            self.main = OperatorMainWindow()
+            
         self.main.show()
         self.close()

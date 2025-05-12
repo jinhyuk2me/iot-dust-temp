@@ -1,5 +1,4 @@
 # tcpio package
 
-from .truck_commander import TruckCommandSender
-from .server import TCPServer
-from .client import TCPClient
+from .truck_command_sender import TruckCommandSender
+from .tcp_server import TCPServer
